@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# to load all /lib files
+$LOAD_PATH.push File.expand_path("lib", __dir__)
+
 require_relative "lib/monopay-ruby/version"
 
 Gem::Specification.new do |spec|
@@ -30,7 +33,15 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   # Uncomment to register a new dependency of your gem
-  # spec.add_dependency "example-gem", "~> 1.0"
+  # TODO: Use metal versions of gems where possible to avoid unnecessary extra
+  spec.add_dependency "rest-client", "~> 2.1"
+  spec.add_dependency "base64", "~> 0.1.1"
+  spec.add_dependency "json", "~> 2.5"
+  spec.add_dependency "openssl", "~> 2.1"
+  spec.add_dependency "money", "~> 6.13"
+
+  spec.add_development_dependency "rspec", "~> 3.0"
+  spec.add_development_dependency "pry", "~> 0.14.2"
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html
