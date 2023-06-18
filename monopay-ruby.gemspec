@@ -37,7 +37,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rest-client", "~> 2.1"
   spec.add_dependency "base64", "~> 0.1.1"
   spec.add_dependency "json", "~> 2.5"
-  spec.add_dependency "openssl", "~> 2.1"
+  # spec.add_dependency "openssl", "~> 2.1"
   spec.add_dependency "money", "~> 6.13"
 
   spec.add_development_dependency "rspec", "~> 3.0"
