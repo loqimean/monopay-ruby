@@ -1,3 +1,5 @@
+[![Actions Status](https://github.com/loqimean/monopay-ruby/actions/workflows/ci.yml/badge.svg)](https://github.com/loqimean/monopay-ruby/actions)
+
 # MonopayRuby
 
 The "monopay-ruby" gem simplifies Monobank payment integration in Ruby and Rails applications. It provides an intuitive interface and essential functionalities for generating payment requests, verifying transactions, handling callbacks, and ensuring data integrity. With this gem, you can quickly and securely implement Monobank payments, saving development time and delivering a seamless payment experience to your users.
