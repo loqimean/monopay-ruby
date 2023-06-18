@@ -1,16 +1,22 @@
-# Monopay::Ruby
+# MonopayRuby
 
 The "monopay-ruby" gem simplifies Monobank payment integration in Ruby and Rails applications. It provides an intuitive interface and essential functionalities for generating payment requests, verifying transactions, handling callbacks, and ensuring data integrity. With this gem, you can quickly and securely implement Monobank payments, saving development time and delivering a seamless payment experience to your users.
+
+This gem was developed for Monobank API [https://api.monobank.ua/docs/acquiring.html](https://api.monobank.ua/docs/acquiring.html)
 
 ## Installation
 
 Install the gem and add to the application's Gemfile by executing:
 
-    $ bundle add "monopay-ruby"
+```bash
+bundle add "monopay-ruby"
+```
 
 If bundler is not being used to manage dependencies, install the gem by executing:
 
-    $ gem install "monopay-ruby"
+```ruby
+gem install "monopay-ruby"
+```
 
 ## Usage
 
@@ -18,8 +24,8 @@ Add API token. There are two ways:
 First - add to the initializer file:
 
 ```ruby
-# config/initializers/monopay.rb
-Monopay.configure do |config|
+# config/initializers/monopay-ruby.rb
+MonopayRuby.configure do |config|
   config.api_token = "your_api_token"
 end
 ```
@@ -31,13 +37,19 @@ The second one - add to the environment variable:
 MONOPAY_API_TOKEN=your_api_token
 ```
 
+You can get the API token depending on the environment:
+Development: [https://api.monobank.ua/](https://api.monobank.ua/)
+Production: [https://fop.monobank.ua/](https://fop.monobank.ua/)
+
+Just get the token and go to earn moneys! 🚀
+
 ### Generate payment request
 
 ```ruby
 # app/controllers/payments_controller.rb
 class PaymentsController < ApplicationController
   def create
-    payment = Monopay::Payment.new(
+    payment = MonopayRuby::Invoices::SimpleInvoice.new(
       redirect_url: "https://example.com",
       webhook_url: "https://example.com/payments/webhook"
     )
@@ -60,7 +72,7 @@ class PaymentsController < ApplicationController
   skip_before_action :verify_authenticity_token, only: :webhook
 
   def webhook
-    webhook_validator = Monopay::Webhooks::Validator.new(request)
+    webhook_validator = MonopayRuby::Webhooks::Validator.new(request)
 
     if webhook_validator.valid?
       # your success code processing
