@@ -1,6 +1,6 @@
 # Monopay::Ruby
 
-The \"monopay-ruby\" gem simplifies Monobank payment integration in Ruby and Rails applications. It provides an intuitive interface and essential functionalities for generating payment requests, verifying transactions, handling callbacks, and ensuring data integrity. With this gem, you can quickly and securely implement Monobank payments, saving development time and delivering a seamless payment experience to your users.
+The "monopay-ruby" gem simplifies Monobank payment integration in Ruby and Rails applications. It provides an intuitive interface and essential functionalities for generating payment requests, verifying transactions, handling callbacks, and ensuring data integrity. With this gem, you can quickly and securely implement Monobank payments, saving development time and delivering a seamless payment experience to your users.
 
 ## Installation
 
@@ -14,7 +14,63 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ## Usage
 
-Some text
+Add API token. There are two ways:
+First - add to the initializer file:
+
+```ruby
+# config/initializers/monopay.rb
+Monopay.configure do |config|
+  config.api_token = "your_api_token"
+end
+```
+
+The second one - add to the environment variable:
+
+```bash
+# .env
+MONOPAY_API_TOKEN=your_api_token
+```
+
+### Generate payment request
+
+```ruby
+# app/controllers/payments_controller.rb
+class PaymentsController < ApplicationController
+  def create
+    payment = Monopay::Payment.new(
+      redirect_url: "https://example.com",
+      webhook_url: "https://example.com/payments/webhook"
+    )
+
+    if payment.create(amount: 100, description: "Payment description",)
+      # your success code processing
+    else
+      # your error code processing
+      # flash[:error] = payment.error_messages
+    end
+  end
+end
+```
+
+### Verify transaction
+
+```ruby
+# app/controllers/payments_controller.rb
+class PaymentsController < ApplicationController
+  skip_before_action :verify_authenticity_token, only: :webhook
+
+  def webhook
+    webhook_validator = Monopay::Webhooks::Validator.new(request)
+
+    if webhook_validator.valid?
+      # your success code processing
+    else
+      # your error code processing
+      # flash[:error] = webhook_validator.error_messages
+    end
+  end
+end
+```
 
 ## Development
 
