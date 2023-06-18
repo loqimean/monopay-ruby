@@ -1,26 +1,40 @@
+require "rest-client"
+require "base64"
+require "json"
+
+require "pry"
 module MonopayRuby
   module Webhooks
     class PublicKey < MonopayRuby::Base
-      attr_reader :status, :error_messages, :key
+      attr_reader :error_messages, :key
 
       API_GET_KEY_URL = "#{API_URL}/merchant/pubkey".freeze
       PUBLIC_KEY_KEY = "key".freeze
 
+      def initialize
+        @error_messages = []
+      end
+
       # Get public key from Monobank API
       #
-      # @return [String] public key or error message if failed
+      # @return [Boolean] true if key was successfully received, false otherwise
       def request_key
         begin
           response = RestClient.get(API_GET_KEY_URL, headers)
           response_body = JSON.parse(response.body)
           base64_key = JSON.parse(response.body)[PUBLIC_KEY_KEY]
-          @status = SUCCESS
 
           @key = Base64.decode64(base64_key)
+
+          true
         rescue Exception => e
           # TODO: Check how for example Stripe or Liqpay handle errors
-          @status = FAILURE
-          @error_messages << [e.message, e.response.body].join(", ")
+          response_body = JSON.parse(e.response.body)
+          error_message = [e.message, response_body].join(", ")
+
+          error_messages << error_message
+
+          false
         end
       end
     end

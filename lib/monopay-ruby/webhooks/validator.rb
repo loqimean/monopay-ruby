@@ -1,5 +1,3 @@
-# require "monopay-ruby/webhooks/public_key"
-
 module MonopayRuby
   module Webhooks
     class Validator
@@ -43,24 +41,23 @@ module MonopayRuby
       #
       # @return [Boolean] true if valid, false if not valid
       def valid?
-        return false if @webhook_data.blank?
-        return false if signature.blank?
+        return false if @webhook_data.nil?
+        return false if signature.nil?
 
-        @public_key_service.request_key
-
-        case @public_key_service.status
-        when MonopayRuby::Base::SUCCESS
+        if @public_key_service.request_key
           @public_key ||= @public_key_service.key
 
-          openssl_ec = OpenSSL::PKey::EC.new(public_key)
+          openssl_ec = OpenSSL::PKey::EC.new(@public_key)
           openssl_ec.check_key
 
-          openssl_ec.verify(digest, signature, @webhook_data)
-        when MonopayRuby::Base::FAILURE
-          @error_messages << @public_key_service.error_messages
+          return true if openssl_ec.verify(digest, signature, @webhook_data)
 
-          false
+          @error_messages << "Webhook aren't authorized. Might be signature is invalid or webhook data is modified."
+        else
+          @error_messages << @public_key_service.error_messages
         end
+
+        false
       end
 
       private

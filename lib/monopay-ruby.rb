@@ -4,9 +4,6 @@ module MonopayRuby
   class Base
     API_URL = "https://api.monobank.ua/api".freeze
 
-    SUCCESS = :success
-    FAILURE = :failure
-
     protected
 
     # Required headers for Monobank API
@@ -16,7 +13,7 @@ module MonopayRuby
       {
         content_type: :json,
         accept: :json,
-        "X-Token": MonopayRuby.configuration.api_token # TODO: use config and write where user can find this token
+        "X-Token": MonopayRuby.configuration.api_token
       }
     end
   end

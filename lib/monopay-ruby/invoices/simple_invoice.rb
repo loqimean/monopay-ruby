@@ -1,7 +1,10 @@
+require "bigdecimal"
+require "money"
+
 module MonopayRuby
   module Invoices
     class SimpleInvoice < MonopayRuby::Base
-      attr_reader :invoice_id, :page_url, :status, :error_messages, :amount, :destination, :redirect_url, :webhook_url
+      attr_reader :invoice_id, :page_url, :error_messages, :amount, :destination, :redirect_url, :webhook_url
 
       API_CREATE_INVOICE_URL = "#{API_URL}/merchant/invoice/create".freeze
 
@@ -25,7 +28,7 @@ module MonopayRuby
       #
       # @param [BigDecimal,Integer] amount in UAH (cents) to request payment
       # @param [String] destination - additional info about payment
-      # @return [String] invoice_id from Monobank API or an error message
+      # @return [Boolean] true if invoice was created successfully, false otherwise
       def create(amount, destination = nil)
         begin
           @amount = convert_to_cents(amount)
@@ -34,12 +37,17 @@ module MonopayRuby
           response = RestClient.post(API_CREATE_INVOICE_URL, request_body, headers)
           response_body = JSON.parse(response.body)
 
-          @status = SUCCESS
           @page_url = JSON.parse(response.body)[PAGE_URL_KEY]
           @invoice_id = JSON.parse(response.body)[INVOICE_ID_KEY]
-        rescue RestClient::ExceptionWithResponse => e
-          @status = FAILURE
-          @error_messages << [e.message, e.response.body].join(", ")
+
+          true
+        rescue Exception => e
+          response_body = JSON.parse(e.response.body)
+          @error_messages << [e.message, response_body].join(", ")
+          # TODO: use errors and full_messages like rails
+          # TODO: use logger to log errors or successful invoice creation
+
+          false
         end
       end
 
@@ -50,6 +58,7 @@ module MonopayRuby
       # @return [Hash] request body
       def request_body
         # TODO: add "ccy" and another missing params
+        # TODO: remove nil valued params
         {
           amount: amount,
           redirectUrl: redirect_url,
