@@ -54,8 +54,8 @@ Just get the token and go to earn moneys! 🚀
 class PaymentsController < ApplicationController
   def create
     payment = MonopayRuby::Invoices::SimpleInvoice.new(
-      redirect_url: "https://example.com",
-      webhook_url: "https://example.com/payments/webhook"
+      "https://example.com",
+      "https://example.com/payments/webhook"
     )
 
     if payment.create(amount: 100, destination: "Payment description",)
