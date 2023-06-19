@@ -4,11 +4,11 @@ require "money"
 module MonopayRuby
   module Invoices
     class SimpleInvoice < MonopayRuby::Base
-      attr_reader :invoice_id, :page_url, :error_messages, :amount, :destination, :redirect_url, :webhook_url
+      attr_reader :invoice_id, :page_url, :error_messages, :amount, :destination, :reference, :redirect_url, :webhook_url
 
       API_CREATE_INVOICE_URL = "#{API_URL}/merchant/invoice/create".freeze
 
-      CURRENCY = "UAH".freeze
+      DEFAULT_CURRENCY = "UAH".freeze
 
       PAGE_URL_KEY = "pageUrl".freeze
       INVOICE_ID_KEY = "invoiceId".freeze
@@ -28,11 +28,13 @@ module MonopayRuby
       #
       # @param [BigDecimal,Integer] amount in UAH (cents) to request payment
       # @param [String] destination - additional info about payment
+      # @param [String] reference - bill number or other reference
       # @return [Boolean] true if invoice was created successfully, false otherwise
-      def create(amount, destination = nil)
+      def create(amount, destination: nil, reference: nil)
         begin
           @amount = convert_to_cents(amount)
           @destination = destination
+          @reference = reference
 
           response = RestClient.post(API_CREATE_INVOICE_URL, request_body, headers)
           response_body = JSON.parse(response.body)
@@ -64,6 +66,7 @@ module MonopayRuby
           redirectUrl: redirect_url,
           webHookUrl: webhook_url,
           merchantPaymInfo: {
+            reference: reference,
             destination: destination
           }
         }.to_json
@@ -71,7 +74,7 @@ module MonopayRuby
 
       def convert_to_cents(amount)
         if amount.is_a?(BigDecimal)
-          Money.from_amount(amount, CURRENCY).cents
+          Money.from_amount(amount, DEFAULT_CURRENCY).cents
         else
           amount
         end
