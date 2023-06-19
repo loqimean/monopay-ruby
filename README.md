@@ -56,7 +56,7 @@ class PaymentsController < ApplicationController
       webhook_url: "https://example.com/payments/webhook"
     )
 
-    if payment.create(amount: 100, description: "Payment description",)
+    if payment.create(amount: 100, destination: "Payment description",)
       # your success code processing
     else
       # your error code processing
