@@ -39,8 +39,10 @@ The second one - add to the environment variable:
 MONOPAY_API_TOKEN=your_api_token
 ```
 
-You can get the API token depending on the environment:
+#### You can get the API token depending on the environment:
+
 Development: [https://api.monobank.ua/](https://api.monobank.ua/)
+
 Production: [https://fop.monobank.ua/](https://fop.monobank.ua/)
 
 Just get the token and go to earn moneys! 🚀
