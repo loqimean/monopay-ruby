@@ -2,7 +2,6 @@ require "rest-client"
 require "base64"
 require "json"
 
-require "pry"
 module MonopayRuby
   module Webhooks
     class PublicKey < MonopayRuby::Base

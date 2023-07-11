@@ -73,10 +73,13 @@ module MonopayRuby
       end
 
       def convert_to_cents(amount)
-        if amount.is_a?(BigDecimal)
+        begin
+          amount = amount.to_d
+          raise Exception if amount < MonopayRuby.configuration.min_value
+
           Money.from_amount(amount, DEFAULT_CURRENCY).cents
-        else
-          amount
+        rescue Exception => e
+          return
         end
       end
     end
