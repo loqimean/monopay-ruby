@@ -32,7 +32,7 @@ module MonopayRuby
       # @return [Boolean] true if invoice was created successfully, false otherwise
       def create(amount, discount=1, destination: nil, reference: nil)
         begin
-          @amount = convert_to_cents(amount)
+          @amount = [convert_to_cents(amount), MonopayRuby.configuration.min_value].max
           @destination = destination
           @reference = reference
 
