@@ -30,11 +30,13 @@ module MonopayRuby
       # @param [String] destination - additional info about payment
       # @param [String] reference - bill number or other reference
       # @return [Boolean] true if invoice was created successfully, false otherwise
-      def create(amount, destination: nil, reference: nil)
+      def create(amount, discount=1, destination: nil, reference: nil)
         begin
           @amount = convert_to_cents(amount)
           @destination = destination
           @reference = reference
+
+          make_discount(discount) if discount < 1
 
           response = RestClient.post(API_CREATE_INVOICE_URL, request_body, headers)
           response_body = JSON.parse(response.body)
@@ -73,14 +75,19 @@ module MonopayRuby
       end
 
       def convert_to_cents(amount)
-        begin
-          amount = amount.to_d
-          raise Exception if amount < MonopayRuby.configuration.min_value
-
+        if amount.is_a?(BigDecimal)
           Money.from_amount(amount, DEFAULT_CURRENCY).cents
-        rescue Exception => e
-          return
+        elsif amount.is_a?(Integer)
+          amount
+        else
+          raise TypeError, "expected amount will be an Integer or BigDecimal, got #{amount.class}"
         end
+      end
+
+      def make_discount(discount)
+        sum = (@amount * (1 - discount)).to_i
+
+        @amount = [sum, MonopayRuby.configuration.min_value].max
       end
     end
   end
