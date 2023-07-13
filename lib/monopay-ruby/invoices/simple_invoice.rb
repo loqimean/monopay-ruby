@@ -83,7 +83,7 @@ module MonopayRuby
         elsif amount.is_a?(Integer)
           amount
         else
-          raise TypeError, "expected amount will be an Integer or BigDecimal, got #{amount.class}"
+          raise TypeError, "allowed to use only a BigDecimal or Integer price"
         end
       end
 
@@ -97,8 +97,9 @@ module MonopayRuby
 
       def make_discount(discount, discount_is_fixed)
         sum = discount_is_fixed ? (@amount - discount) : (@amount * discount)
+        puts MonopayRuby.configuration.min_value.class
 
-        [sum.to_i, MonopayRuby.configuration.min_value].max
+        [sum.to_i, convert_to_cents(MonopayRuby.configuration.min_value)].max
       end
     end
   end

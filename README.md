@@ -20,7 +20,7 @@ If bundler is not being used to manage dependencies, install the gem by executin
 gem install "monopay-ruby"
 ```
 
-## Usage
+## Confiruration
 
 Add API token. There are two ways:
 First - add to the initializer file:
@@ -47,7 +47,26 @@ Production: [https://fop.monobank.ua/](https://fop.monobank.ua/)
 
 Just get the token and go to earn moneys! 🚀
 
+Optional
+
+You may add a minimumm value to your payment:
+
+```ruby
+# config/initializers/monopay-ruby.rb
+MonopayRuby.configure do |config|
+  config.min_value = 1
+end
+```
+* 0.01 UAH - it is a minimal valid value for Monobank
+if you use 1 as an Integer it is equal to 0.01 UAH
+if you use BigDeciamal(5) it's equal to 5 UAH
+
+Default value is 1 (0.01 UAH)
+
+
 ### Generate payment request
+
+Simple:
 
 ```ruby
 # app/controllers/payments_controller.rb
@@ -58,7 +77,7 @@ class PaymentsController < ApplicationController
       "https://example.com/payments/webhook"
     )
 
-    if payment.create(amount: 100, destination: "Payment description",)
+    if payment.create(amount: 100, destination: "Payment description")
       # your success code processing
     else
       # your error code processing
@@ -67,6 +86,35 @@ class PaymentsController < ApplicationController
   end
 end
 ```
+
+With discount:
+
+```ruby
+# app/controllers/payments_controller.rb
+class PaymentsController < ApplicationController
+  def create
+    payment = MonopayRuby::Invoices::SimpleInvoice.new(
+      "https://example.com",
+      "https://example.com/payments/webhook"
+    )
+
+    if payment.create(amount: 100, discount: 20, discount_is_fixed: true, destination: "Payment description")
+      # your success code processing
+    else
+      # your error code processing
+      # flash[:error] = payment.error_messages
+    end
+  end
+end
+```
+
+Where:
+- discount - is an number, which represents a % of discount if discount_is_fixed: false and an amount of discount if discount_is_fixed: true
+- discount_is_fixed - a Boolean which set type of discount:
+  - true if it's with fixed amount, for example a coupon
+  - false if you need a some percentage of discount
+* can be Integer, Float or BigDecimal
+
 
 ### Verify transaction
 
