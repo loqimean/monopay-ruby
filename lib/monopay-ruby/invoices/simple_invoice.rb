@@ -30,13 +30,16 @@ module MonopayRuby
       # @param [String] destination - additional info about payment
       # @param [String] reference - bill number or other reference
       # @return [Boolean] true if invoice was created successfully, false otherwise
-      def create(amount, discount=1, destination: nil, reference: nil)
+      def create(amount, discount=100, discount_is_fixed=false, destination: nil, reference: nil)
         begin
-          @amount = [convert_to_cents(amount), MonopayRuby.configuration.min_value].max
+          @amount = convert_to_cents(amount)
           @destination = destination
           @reference = reference
+          discount = convert_discount(discount, discount_is_fixed)
 
-          make_discount(discount) if discount < 1
+          if discount_is_fixed || (discount < 1 && discount > 0)
+            @amount = make_discount(discount, discount_is_fixed)
+          end
 
           response = RestClient.post(API_CREATE_INVOICE_URL, request_body, headers)
           response_body = JSON.parse(response.body)
@@ -84,10 +87,18 @@ module MonopayRuby
         end
       end
 
-      def make_discount(discount)
-        sum = (@amount * (1 - discount)).to_i
+      def convert_discount(discount, discount_is_fixed)
+        if discount_is_fixed
+          convert_to_cents(discount)
+        else
+          (1 - (discount.to_f / 100))
+        end
+      end
 
-        @amount = [sum, MonopayRuby.configuration.min_value].max
+      def make_discount(discount, discount_is_fixed)
+        sum = discount_is_fixed ? (@amount - discount) : (@amount * discount)
+
+        [sum.to_i, MonopayRuby.configuration.min_value].max
       end
     end
   end
