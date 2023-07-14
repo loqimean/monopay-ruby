@@ -30,15 +30,19 @@ module MonopayRuby
       # @param [String] destination - additional info about payment
       # @param [String] reference - bill number or other reference
       # @return [Boolean] true if invoice was created successfully, false otherwise
-      def create(amount, discount=100, discount_is_fixed=false, destination: nil, reference: nil)
+      def create(amount, discount=nil, discount_is_fixed=false, destination: nil, reference: nil)
+
         begin
-          @amount = convert_to_cents(amount)
+          @min_amount = MonopayRuby::Services::ValidateValue.call(MonopayRuby.configuration.min_value, DEFAULT_CURRENCY, "Minimal amount")
+          @amount = MonopayRuby::Services::ValidateValue.call(amount, DEFAULT_CURRENCY)
+
           @destination = destination
           @reference = reference
-          discount = convert_discount(discount, discount_is_fixed)
 
-          if discount_is_fixed || (discount < 1 && discount > 0)
-            @amount = make_discount(discount, discount_is_fixed)
+          if discount.present?
+            discount = MonopayRuby::Services::ConvertAmount.call(discount, DEFAULT_CURRENCY)
+
+            @amount = MonopayRuby::Services::Discount.call(@amount, discount, discount_is_fixed, @min_amount)
           end
 
           response = RestClient.post(API_CREATE_INVOICE_URL, request_body, headers)
@@ -75,31 +79,6 @@ module MonopayRuby
             destination: destination
           }
         }.to_json
-      end
-
-      def convert_to_cents(amount)
-        if amount.is_a?(BigDecimal)
-          Money.from_amount(amount, DEFAULT_CURRENCY).cents
-        elsif amount.is_a?(Integer)
-          amount
-        else
-          raise TypeError, "allowed to use only a BigDecimal or Integer price"
-        end
-      end
-
-      def convert_discount(discount, discount_is_fixed)
-        if discount_is_fixed
-          convert_to_cents(discount)
-        else
-          (1 - (discount.to_f / 100))
-        end
-      end
-
-      def make_discount(discount, discount_is_fixed)
-        sum = discount_is_fixed ? (@amount - discount) : (@amount * discount)
-        puts MonopayRuby.configuration.min_value.class
-
-        [sum.to_i, convert_to_cents(MonopayRuby.configuration.min_value)].max
       end
     end
   end
