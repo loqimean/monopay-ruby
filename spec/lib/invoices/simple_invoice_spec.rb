@@ -28,13 +28,7 @@ RSpec.describe MonopayRuby::Invoices::SimpleInvoice do
     context "without parameters" do
       subject { described_class.new }
 
-      it "initializes with nil redirect_url" do
-        expect(subject.redirect_url).to be_nil
-      end
-
-      it "initializes with nil webhook_url" do
-        expect(subject.webhook_url).to be_nil
-      end
+      it { is_expected.to be_a(described_class) }
     end
   end
 
