@@ -17,7 +17,7 @@ module MonopayRuby
       #
       # @param [String] redirect_url - url where user will be redirected after payment
       # @param [String] webhook_url - url where Monobank will send webhook after payment
-      def initialize(redirect_url = nil, webhook_url = nil)
+      def initialize(redirect_url: nil, webhook_url: nil)
         @redirect_url = redirect_url
         @webhook_url = webhook_url
 

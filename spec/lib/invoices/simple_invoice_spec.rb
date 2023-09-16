@@ -1,6 +1,37 @@
 # frozen_string_literal: true
 
 RSpec.describe MonopayRuby::Invoices::SimpleInvoice do
+  describe "#new" do
+    let!(:redirect_url) { "https://redirect.example.com" }
+    let!(:webhook_url) { "https://webhook.example.com" }
+
+    context "with keyword parameters" do
+      subject { described_class.new(redirect_url: redirect_url, webhook_url: webhook_url) }
+
+      it "initializes with correct redirect_url" do
+        expect(subject.redirect_url).to eq(redirect_url)
+      end
+
+      it "initializes with correct webhook_url" do
+        expect(subject.webhook_url).to eq(webhook_url)
+      end
+    end
+
+    context "without keyword parameters" do
+      subject { described_class.new(redirect_url, webhook_url) }
+
+      it "raises an ArgumentError" do
+        expect { subject }.to raise_error(ArgumentError)
+      end
+    end
+
+    context "without parameters" do
+      subject { described_class.new }
+
+      it { is_expected.to be_a(described_class) }
+    end
+  end
+
   describe "#create" do
     context "when request is successful" do
       let(:simple_invoice_instance) { described_class.new }
