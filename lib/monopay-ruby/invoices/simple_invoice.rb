@@ -30,14 +30,16 @@ module MonopayRuby
       # @param [String] destination - additional info about payment
       # @param [String] reference - bill number or other reference
       # @return [Boolean] true if invoice was created successfully, false otherwise
-      def create(amount, discount: nil, discount_is_fixed: false, destination: nil, reference: nil)
+      def create(amount:, options: {})
+        @amount = amount
+        discount = options[:discount]
+        discount_is_fixed = options[:discount_is_fixed]
+        @destination = options[:destination]
+        @reference = options[:reference]
 
         begin
           @min_amount = MonopayRuby::Services::ValidateValue.call(MonopayRuby.configuration.min_price, DEFAULT_CURRENCY, "Minimal amount")
           @amount = MonopayRuby::Services::ValidateValue.call(amount, DEFAULT_CURRENCY)
-
-          @destination = destination
-          @reference = reference
 
           if discount.present?
             discount = MonopayRuby::Services::ConvertAmount.call(discount, DEFAULT_CURRENCY)
