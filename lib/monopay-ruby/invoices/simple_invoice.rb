@@ -41,7 +41,7 @@ module MonopayRuby
           @min_amount = MonopayRuby::Services::ValidateValue.call(MonopayRuby.configuration.min_price, DEFAULT_CURRENCY, "Minimal amount")
           @amount = MonopayRuby::Services::ValidateValue.call(amount, DEFAULT_CURRENCY)
 
-          if discount.present?
+          if discount
             discount = MonopayRuby::Services::ConvertAmount.call(discount, DEFAULT_CURRENCY)
 
             @amount = MonopayRuby::Services::Discount.call(@amount, discount, discount_is_fixed, @min_amount)
