@@ -116,7 +116,7 @@ Options:
 - discount - is an number, which represents a % of discount if discount_is_fixed: false and an amount of discount if discount_is_fixed: true
 - discount_is_fixed - a Boolean which sets the type of discount:
   - ```true``` fixed amount of discount will be applied, for example a coupon (use Integer or BigDecimal in ```discount``` )
-  - ```false``` discount amount will be preceded by % (use Integer in ```discount``` for corrent counting of 0-100 %)
+  - ```false``` discount amount will be preceded by % (use Integer in ```discount``` for correct counting of 0-100 %)
 
 
 ### Verify transaction
