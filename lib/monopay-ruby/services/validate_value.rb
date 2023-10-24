@@ -1,6 +1,6 @@
 require "bigdecimal"
 
-module MonopayRuby 
+module MonopayRuby
   module Services
     class ValidateValue < BaseService
       attr_reader :amount, :currency, :type
@@ -16,7 +16,7 @@ module MonopayRuby
           if amount > 0
             MonopayRuby::Services::ConvertAmount.call(amount, currency)
           else
-            raise ValueError, "#{type} must be greater than 0"
+            raise ArgumentError, "#{type} must be greater than 0"
           end
         else
           raise TypeError, "#{type} is allowed to be Integer or BigDecimal, got #{amount.class}" unless amount.is_a?(Integer) || amount.is_a?(BigDecimal)
