@@ -43,26 +43,64 @@ RSpec.describe MonopayRuby::Invoices::SimpleInvoice do
         allow(RestClient).to receive(:post).and_return(double(body: response_example.to_json))
       end
 
-      it "returns true" do
-        expect(simple_invoice_instance.create(2000)).to be_truthy
+      context "only with amount" do
+        it "returns true" do
+          expect(simple_invoice_instance.create(amount: 2000)).to be_truthy
+        end
+
+        it "sets invoice_id" do
+          expect do
+            simple_invoice_instance.create(amount: 2000)
+          end.to change(simple_invoice_instance, :invoice_id).from(nil).to(invoice_id)
+        end
+
+        it "sets page_url" do
+          expect do
+            simple_invoice_instance.create(amount: 2000)
+          end.to change(simple_invoice_instance, :page_url).from(nil).to(page_url)
+        end
       end
 
-      it "sets invoice_id" do
-        expect do
-          simple_invoice_instance.create(2000)
-        end.to change(simple_invoice_instance, :invoice_id).from(nil).to(invoice_id)
+      context "with amount and discount (fixed)" do
+        it "returns true" do
+          expect(simple_invoice_instance.create(amount: 2000, options: { discount: 20.to_d, discount_is_fixed: true }) ).to be_truthy
+        end
+
+        it "sets invoice_id" do
+          expect do
+            simple_invoice_instance.create(amount: 2000, options: { discount: 20.to_d, discount_is_fixed: true })
+          end.to change(simple_invoice_instance, :invoice_id).from(nil).to(invoice_id)
+        end
+
+        it "sets page_url" do
+          expect do
+            simple_invoice_instance.create(amount: 2000, options: { discount: 20.to_d, discount_is_fixed: true })
+          end.to change(simple_invoice_instance, :page_url).from(nil).to(page_url)
+        end
       end
 
-      it "sets page_url" do
-        expect do
-          simple_invoice_instance.create(2000)
-        end.to change(simple_invoice_instance, :page_url).from(nil).to(page_url)
+      context "with amount and discount (not fixed)" do
+        it "returns true" do
+          expect(simple_invoice_instance.create(amount: 2000, options: { discount: 20, discount_is_fixed: false }) ).to be_truthy
+        end
+
+        it "sets invoice_id" do
+          expect do
+            simple_invoice_instance.create(amount: 2000, options: { discount: 20, discount_is_fixed: false })
+          end.to change(simple_invoice_instance, :invoice_id).from(nil).to(invoice_id)
+        end
+
+        it "sets page_url" do
+          expect do
+            simple_invoice_instance.create(amount: 2000, options: { discount: 20, discount_is_fixed: false })
+          end.to change(simple_invoice_instance, :page_url).from(nil).to(page_url)
+        end
       end
 
       context "when amount is BigDecimal" do
         it "sets amount" do
           expect do
-            simple_invoice_instance.create(BigDecimal("20"))
+            simple_invoice_instance.create(amount: BigDecimal("20"))
           end.to change(simple_invoice_instance, :amount).from(nil).to(2000)
         end
       end
@@ -87,11 +125,11 @@ RSpec.describe MonopayRuby::Invoices::SimpleInvoice do
         end
 
         it "returns false" do
-          expect(subject.create(2000)).to be_falsey
+          expect(subject.create(amount: 2000)).to be_falsey
         end
 
         it "has error message" do
-          subject.create(2000)
+          subject.create(amount: 2000)
 
           expect(subject.error_messages).to include(missing_x_token_header_error_message)
         end
@@ -114,40 +152,30 @@ RSpec.describe MonopayRuby::Invoices::SimpleInvoice do
         end
 
         it "returns false" do
-          expect(subject.create(2000)).to be_falsey
+          expect(subject.create(amount: 2000)).to be_falsey
         end
 
         it "has error message" do
-          subject.create(2000)
+          subject.create(amount: 2000)
 
           expect(subject.error_messages).to include(invalid_token_error_message)
         end
       end
 
-      context "with invalid params" do
-        let(:invalid_amount_server_error_message) { { "errCode" => "BAD_REQUEST", "errText" => "json unmarshal: : json: cannot unmarshal string into Go struct field InvoiceCreateRequest.amount of type int64" } }
-        let(:error_code) { "400 Bad Request" }
-        let(:invalid_amount_error_message) do
-          [error_code, invalid_amount_server_error_message].join(", ")
-        end
-        let(:exception_instance) do
-          RestClient::ExceptionWithResponse.new(double(body: invalid_amount_server_error_message.to_json))
+      context 'when amount is a invalid' do
+        it 'raises a TypeError if amount type is a string' do
+          expect { subject.create(amount: '13') }
+                .to raise_error(TypeError, 'Amount is allowed to be Integer or BigDecimal, got String')
         end
 
-        before do
-          exception_instance.message = error_code
-
-          allow(RestClient).to receive(:post).and_raise(exception_instance)
+        it 'raises a TypeError if amount type is a float' do
+          expect { subject.create(amount: 666.0) }
+                .to raise_error(TypeError, 'Amount is allowed to be Integer or BigDecimal, got Float')
         end
 
-        it "returns false" do
-          expect(subject.create("")).to be_falsey
-        end
-
-        it "has error message" do
-          subject.create("")
-
-          expect(subject.error_messages).to include(invalid_amount_error_message)
+        it 'raises a ArgumentError if amount negative' do
+          expect { subject.create(amount: -1) }
+                .to raise_error(ArgumentError, 'Amount must be greater than 0')
         end
       end
     end

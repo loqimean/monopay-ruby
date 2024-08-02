@@ -15,13 +15,13 @@ Install the gem and add to the application's Gemfile by executing:
 bundle add "monopay-ruby"
 ```
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+If bundler is not being used to manage dependencies, install the gem by executing the:
 
 ```ruby
 gem install "monopay-ruby"
 ```
 
-## Usage
+## Configuration
 
 Add API token. There are two ways:
 First - add to the initializer file:
@@ -46,9 +46,31 @@ Development: [https://api.monobank.ua/](https://api.monobank.ua/)
 
 Production: [https://fop.monobank.ua/](https://fop.monobank.ua/)
 
-Just get the token and go to earn moneys! 🚀
+Just get the token and go to earn money! 🚀
+
+
+_______________________________________________________________
+
+Optional
+
+You may add a minimum value to your payment:
+
+```ruby
+# config/initializers/monopay-ruby.rb
+MonopayRuby.configure do |config|
+  config.min_price = 1
+end
+```
+* 0.01 UAH - it is a minimal valid value for Monobank:
+  - if you use 1 as an Integer it is equal to 0.01 UAH
+  - if you use BigDecimal(1) it's equal to 1 UAH
+
+The default value is 1 (0.01 UAH)
+
 
 ### Generate payment request
+
+Simple:
 
 ```ruby
 # app/controllers/payments_controller.rb
@@ -59,8 +81,8 @@ class PaymentsController < ApplicationController
       "https://example.com/payments/webhook"
     )
 
-    if payment.create(amount: 100, destination: "Payment description",)
-      # your success code processing
+    if payment.create(amount: 100, destination: "Payment description")
+      # your successful code processing
     else
       # your error code processing
       # flash[:error] = payment.error_messages
@@ -68,6 +90,34 @@ class PaymentsController < ApplicationController
   end
 end
 ```
+
+With discount:
+
+```ruby
+# app/controllers/payments_controller.rb
+class PaymentsController < ApplicationController
+  def create
+    payment = MonopayRuby::Invoices::SimpleInvoice.new(
+      "https://example.com",
+      "https://example.com/payments/webhook"
+    )
+
+    if payment.create(amount: 100, discount: 20, discount_is_fixed: true, destination: "Payment description")
+      # your successful code processing
+    else
+      # your error code processing
+      # flash[:error] = payment.error_messages
+    end
+  end
+end
+```
+
+Options:
+- discount - is an number, which represents a % of discount if discount_is_fixed: false and an amount of discount if discount_is_fixed: true
+- discount_is_fixed - a Boolean which sets the type of discount:
+  - ```true``` fixed amount of discount will be applied, for example a coupon (use Integer or BigDecimal in ```discount``` )
+  - ```false``` discount amount will be preceded by % (use Integer in ```discount``` for correct counting of 0-100 %)
+
 
 ### Verify transaction
 
@@ -80,7 +130,7 @@ class PaymentsController < ApplicationController
     webhook_validator = MonopayRuby::Webhooks::Validator.new(request)
 
     if webhook_validator.valid?
-      # your success code processing
+      # your successful code processing
     else
       # your error code processing
       # flash[:error] = webhook_validator.error_messages

@@ -30,11 +30,20 @@ module MonopayRuby
       # @param [String] destination - additional info about payment
       # @param [String] reference - bill number or other reference
       # @return [Boolean] true if invoice was created successfully, false otherwise
-      def create(amount, destination: nil, reference: nil)
+      def create(amount:, options: {})
+        @amount = MonopayRuby::Services::ValidateValue.call(amount, DEFAULT_CURRENCY)
+        discount = options[:discount]
+        discount_is_fixed = options[:discount_is_fixed]
+        @destination = options[:destination]
+        @reference = options[:reference]
+
+        @min_amount = MonopayRuby::Services::ValidateValue.call(MonopayRuby.configuration.min_price, DEFAULT_CURRENCY, "Minimal amount")
         begin
-          @amount = convert_to_cents(amount)
-          @destination = destination
-          @reference = reference
+          if discount
+            discount = MonopayRuby::Services::ConvertAmount.call(discount, DEFAULT_CURRENCY)
+
+            @amount = MonopayRuby::Services::Discount.call(@amount, discount, discount_is_fixed, @min_amount)
+          end
 
           response = RestClient.post(API_CREATE_INVOICE_URL, request_body, headers)
           response_body = JSON.parse(response.body)
@@ -70,14 +79,6 @@ module MonopayRuby
             destination: destination
           }
         }.to_json
-      end
-
-      def convert_to_cents(amount)
-        if amount.is_a?(BigDecimal)
-          Money.from_amount(amount, DEFAULT_CURRENCY).cents
-        else
-          amount
-        end
       end
     end
   end
