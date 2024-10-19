@@ -69,6 +69,29 @@ class PaymentsController < ApplicationController
 end
 ```
 
+## Generate advanced payment request:
+
+```ruby
+# app/controllers/payments_controller.rb
+class PaymentsController < ApplicationController
+  def create
+    payment = MonopayRuby::Invoices::AdvancedInvoice.new(
+      redirect_url: "https://example.com",
+      webhook_url: "https://example.com/payments/webhook"
+    )
+
+    if payment.create(amount, additional_params: {})
+      # your success code processing
+    else
+      # your error code processing
+      # flash[:error] = payment.error_messages
+    end
+  end
+end
+```
+
+`additional_params` - [Read more about params](https://api.monobank.ua/docs/acquiring.html)
+
 ### Verify transaction
 
 ```ruby
