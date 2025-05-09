@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+begin
+  require "pry"
+rescue LoadError
+end
+
 module MonopayRuby
   class Base
     API_URL = "https://api.monobank.ua/api".freeze
