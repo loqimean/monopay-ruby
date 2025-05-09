@@ -39,6 +39,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "json", "~> 2.5"
   # spec.add_dependency "openssl", "~> 2.1"
   spec.add_dependency "money", "~> 6.13"
+  spec.add_dependency "bigdecimal", "~> 3.1.9"
 
   spec.add_development_dependency "rspec", "~> 3.0"
   spec.add_development_dependency "pry", "~> 0.14.2"
