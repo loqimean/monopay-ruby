@@ -1,3 +1,8 @@
+## [1.1.0] - 2024-08-12
+- add ability make payments' requests more advanced by adding more params into `MonopayRuby::Invoices::AdvancedInvoice::create` method
+- change private methods to protected
+- modify `request_body` for additional params
+
 ## [1.0.0] - 2023-06-27
 
 ### Changed

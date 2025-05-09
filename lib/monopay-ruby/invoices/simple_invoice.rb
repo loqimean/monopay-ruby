@@ -43,7 +43,7 @@ module MonopayRuby
           @invoice_id = JSON.parse(response.body)[INVOICE_ID_KEY]
 
           true
-        rescue Exception => e
+        rescue RestClient::ExceptionWithResponse => e
           response_body = JSON.parse(e.response.body)
           @error_messages << [e.message, response_body].join(", ")
           # TODO: use errors and full_messages like rails
@@ -53,12 +53,12 @@ module MonopayRuby
         end
       end
 
-      private
+      protected
 
-      # Request body required for Monobank API
+      # Default params required for request to Monobank
       #
-      # @return [Hash] request body
-      def request_body
+      # @return [Hash] default params
+      def default_params
         # TODO: add "ccy" and another missing params
         # TODO: remove nil valued params
         {
@@ -69,7 +69,14 @@ module MonopayRuby
             reference: reference,
             destination: destination
           }
-        }.to_json
+        }
+      end
+
+      # Request body required for Monobank API
+      #
+      # @return [Hash] request body
+      def request_body
+        default_params.to_json
       end
 
       def convert_to_cents(amount)
