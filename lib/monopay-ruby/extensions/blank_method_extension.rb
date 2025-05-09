@@ -1,9 +1,9 @@
 module MonopayRuby
   module Extensions
     module BlankMethodExtension
-      refine Object do
-        BLANK_RE = /\A[[:space:]]*\z/
+      BLANK_RE = /\A[[:space:]]*\z/
 
+      refine Object do
         # Check if the object is blank
         #
         # @return [Boolean] true if the object is blank, false otherwise
