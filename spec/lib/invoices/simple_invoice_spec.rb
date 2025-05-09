@@ -70,7 +70,7 @@ RSpec.describe MonopayRuby::Invoices::SimpleInvoice do
 
     context "when request is failed" do
       context "with missing token" do
-        # move this code to shared example or mb shared context
+        # todo: move this code to shared example or mb shared context
         let(:missing_x_token_server_message) { { "errorDescription" => "Missing required header 'X-Token'" } }
         let(:error_code) { "400 Bad Request" }
         let(:missing_x_token_header_error_message) do
@@ -83,7 +83,7 @@ RSpec.describe MonopayRuby::Invoices::SimpleInvoice do
         before do
           exception_instance.message = error_code
 
-          allow(RestClient).to receive(:get).and_raise(exception_instance)
+          allow(RestClient).to receive(:post).and_raise(exception_instance)
         end
 
         it "returns false" do
