@@ -1,9 +1,10 @@
-require_relative 'simple_invoice'
-require 'active_support/all'
+require_relative "simple_invoice"
 
 module MonopayRuby
   module Invoices
     class AdvancedInvoice < MonopayRuby::Invoices::SimpleInvoice
+      using MonopayRuby::Extensions::BlankMethodExtension
+
       attr_reader :additional_params, :amount
 
       # Create invoice for Monobank API
@@ -25,8 +26,8 @@ module MonopayRuby
       def create(amount, additional_params: {})
         @amount = amount
         @additional_params = additional_params
-        @destination = @additional_params&.dig(:merchantPaymInfo, :destination)
-        @reference = @additional_params&.dig(:merchantPaymInfo, :reference)
+        @destination = @additional_params.dig(:merchantPaymInfo, :destination)
+        @reference = @additional_params.dig(:merchantPaymInfo, :reference)
 
         super(amount, destination: @destination, reference: @reference)
       end
@@ -38,35 +39,38 @@ module MonopayRuby
 
         return current_params.to_json if additional_params.blank?
 
-        unless additional_params[:merchantPaymInfo].blank?
-          current_params[:merchantPaymInfo] = {
-              reference: @reference,
-              destination: @destination
-            }.merge!(additional_params[:merchantPaymInfo].except(:reference, :destination))
-        end
-
+        merge_merchant_payment_info!(current_params)
         current_params.merge!(additional_params.except(:merchantPaymInfo))
 
-        # It adds and modifies sum and qty params of merchantPaymInfo[basketOrder] parameters if it is present
-        # It adds and modifies sum and qty params of items parameters if it is present
-        set_sum_and_qty_params(current_params&.dig(:merchantPaymInfo, :basketOrder))
-        set_sum_and_qty_params(current_params[:items])
+        update_sum_and_qty_params(current_params.dig(:merchantPaymInfo, :basketOrder))
+        update_sum_and_qty_params(current_params[:items])
 
         current_params.to_json
       end
 
-      # Set sum and qty params
-      # @param current_param [Array] The current parameter to set sum and qty
-      # It sets the converted amount or sum parameter as sum and pasted quantity parameter or default value as qty parameters for the current parameter
-      # @return [Object] It could be Hash or Array or nil. It depends on the current parameter
-      def set_sum_and_qty_params(current_param)
-        return if current_param.blank?
+      # Merges merchant payment information into the current parameters.
+      #
+      # @param current_params [Hash] The current parameters to update.
+      def merge_merchant_payment_info!(current_params)
+        return if additional_params[:merchantPaymInfo].blank?
 
-        current_param.each do |item|
-          return if item.blank?
+        current_params[:merchantPaymInfo] = {
+          reference: @reference,
+          destination: @destination
+        }.merge!(additional_params[:merchantPaymInfo].except(:reference, :destination))
+      end
+
+      # Updates sum and quantity parameters for the given items.
+      #
+      # @param items [Array<Hash>] The items to update.
+      def update_sum_and_qty_params(items)
+        return if items.blank?
+
+        items.each do |item|
+          next if item.blank?
 
           item[:sum] = convert_to_cents(item[:sum] || amount)
-          item[:qty] = item[:qty] || 1
+          item[:qty] ||= 1
         end
       end
     end
