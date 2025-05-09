@@ -1,5 +1,4 @@
-[![Actions Status](https://github.com/loqimean/monopay-ruby/actions/workflows/ci.yml/badge.svg)](https://github.com/loqimean/monopay-ruby/actions)
-[![Listed on OpenSource-Heroes.com](https://opensource-heroes.com/badge-v1.svg)](https://opensource-heroes.com/r/loqimean/fake_picture)
+[![Actions Status](https://github.com/loqimean/monopay-ruby/actions/workflows/ci.yml/badge.svg)](https://github.com/loqimean/monopay-ruby/actions/workflows/ci.yml)
 
 # MonopayRuby
 
